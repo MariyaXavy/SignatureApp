@@ -1,0 +1,66 @@
+﻿
+@model SignatureApp.Models.UserForm
+@{
+    ViewData["Title"] = "Submit Your Info";
+}
+<h2>@ViewData["Title"]</h2>
+<form asp-action="submit" method="post">
+    <div class="mb-3">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Phone"></label>
+        <input asp-for="Phone" class="form-control" />
+        <span asp-validation-for="Phone" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label>Signature</label>
+        <br />
+        <canvas id="signaturePad" width="500" height="200" style="border:1px solid #ccc;"></canvas>
+        <button type="button" onclick="clearSignature()" class="btn btn-outline-secondary">Clear</button>
+        <input type="hidden" asp-for="Signature" id="signatureData" />
+        <span asp-validation-for="Signature" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+@section Scripts {
+    <script>
+        const canvas = document.getElementById("signaturePad");
+        const ctx = canvas.getContext("2d");
+        let drawing = false;
+
+        canvas.addEventListener("mousedown", () => drawing = true);
+        canvas.addEventListener("mouseup", () => {
+            drawing = false;
+            ctx.beginPath();
+            document.getElementById("signatureData").value = canvas.toDataURL();
+        });
+        canvas.addEventListener("mousemove", draw);
+
+        function draw(e) {
+            if (!drawing) return;
+            ctx.lineWidth = 2;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "#000";
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            document.getElementById("signatureData").value = "";
+        }
+    </script>
+}
+
